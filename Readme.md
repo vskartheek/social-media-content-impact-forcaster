@@ -53,13 +53,26 @@ cd social_media_engagement
 
 2. Ensure all dependencies are installed
 
-3. Run the Flask App
+3. train train_bert.py
 
-flask --app app run
+        python train_bert.py
+
+4. train dist_bert.py
+
+        python train_dist_bert.py
+
+--------------------------------------------------
+Make sure the code is exited successfully and 
+all the pkl files are generated
+--------------------------------------------------
+
+5. Run the Flask App
+
+        flask --app app run
 
 The app will run on http://127.0.0.1:5000/
 
-4. Open in Browser
+6. Open in Browser
 
 Navigate to http://127.0.0.1:5000/ and input a sample caption to get predictions.
 
