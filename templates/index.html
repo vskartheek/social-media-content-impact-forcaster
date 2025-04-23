@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Engagement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #F5F7FF 0%, #EEF2FF 100%);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .loading {
+            position: relative;
+        }
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .reach {
+            background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+        }
+        .no-reach {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Social Media Engagement Predictor</h1>
+            <p class="text-gray-600">Predict engagement metrics using advanced AI models</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <form id="predict-form" class="space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="postContent" class="block text-sm font-medium text-gray-700 mb-2">
+                            Post Content
+                        </label>
+                        <textarea
+                            id="postContent"
+                            rows="4"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="Enter your post content here..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="platform" class="block text-sm font-medium text-gray-700 mb-2">
+                                Platform
+                            </label>
+                            <select
+                                id="platform"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                required
+                            >
+                                <option value="" disabled selected>Select Platform</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Twitter">Twitter</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="YouTube">YouTube</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                AI Model
+                            </label>
+                            <div class="space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="model" value="bert" checked class="text-indigo-600">
+                                    <span class="ml-2">BERT</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="model" value="distilbert" class="text-indigo-600">
+                                    <span class="ml-2">DistilBERT</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
+                    id="submit-btn"
+                >
+                    Predict Engagement
+                </button>
+            </form>
+        </div>
+
+        <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+            <p class="text-red-600"></p>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Predicted Engagement Metrics</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="metric-card rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-600 mb-1">Likes</h3>
+                        <p id="likes" class="text-2xl font-bold text-indigo-600">0</p>
+                    </div>
+                    <div class="metric-card rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-600 mb-1">Comments</h3>
+                        <p id="comments" class="text-2xl font-bold text-indigo-600">0</p>
+                    </div>
+                    <div class="metric-card rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-600 mb-1">Impressions</h3>
+                        <p id="impressions" class="text-2xl font-bold text-indigo-600">0</p>
+                    </div>
+                    <div class="metric-card rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-600 mb-1">Reach</h3>
+                        <p id="reach" class="text-2xl font-bold text-indigo-600">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reach-classification" class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Reach Classification</h2>
+                <div id="reach-status" class="rounded-lg p-6 text-center">
+                    <h3 class="text-xl font-medium mb-2">Predicted Reach Status</h3>
+                    <p id="reach-prediction" class="text-3xl font-bold"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predict-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const reachStatus = document.getElementById('reach-status');
+            
+            // Get form values
+            const postContent = document.getElementById('postContent').value;
+            const platform = document.getElementById('platform').value;
+            const model = document.querySelector('input[name="model"]:checked').value;
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Analyzing...';
+            errorDiv.classList.add('hidden');
+            resultsDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        'Post Content': postContent,
+                        'Platform': platform,
+                        'Model': model
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update metrics
+                    document.getElementById('likes').textContent = data.Likes.toLocaleString();
+                    document.getElementById('comments').textContent = data.Comments.toLocaleString();
+                    document.getElementById('impressions').textContent = data.Impressions.toLocaleString();
+                    document.getElementById('reach').textContent = data.Reach.toLocaleString();
+                    
+                    // Update reach classification
+                    const reachPrediction = document.getElementById('reach-prediction');
+                    reachPrediction.textContent = data.ReachStatus;
+                    
+                    // Update reach status styling
+                    reachStatus.className = data.ReachClassification === 1 
+                        ? 'rounded-lg p-6 text-center reach'
+                        : 'rounded-lg p-6 text-center no-reach';
+                    
+                    resultsDiv.classList.remove('hidden');
+                } else {
+                    throw new Error(data.error || 'Failed to fetch predictions');
+                }
+            } catch (error) {
+                errorDiv.querySelector('p').textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Predict Engagement';
+            }
+        });
+    </script>
+</body>
+</html>
